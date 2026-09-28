@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set B = T.buyers %}
+{% block title %}{{ T.meta.buyers_title }} — {{ T.meta.suffix }}{% endblock %}
+{% block description %}{{ T.meta.buyers_desc }}{% endblock %}
+{% block content %}
+
+<section class="page-hero blueprint">
+  <div class="container narrow-hero">
+    <p class="eyebrow eyebrow-light">{{ B.eyebrow }}</p>
+    <h1>{{ B.title }}</h1>
+    <p class="lead">{{ B.lead }}</p>
+    <div class="btn-row"><a class="btn btn-primary" href="{{ url_for('home') }}#rfq-start">{{ B.cta }} {{ icon('arrow') }}</a></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{{ B.process_eyebrow }}</p>
+      <h2>{{ B.process_title }}</h2>
+    </div>
+    <ol class="process">
+      {% for s in T.how.steps %}
+      <li class="process-row">
+        <div class="process-num mono">{{ '%02d' % loop.index }}</div>
+        <div class="process-main">
+          <h3>{{ s.title }} <span class="tag mono">{{ s.duration }}</span></h3>
+          <p>{{ s.text }}</p>
+        </div>
+        <div class="process-out">
+          <span class="mono label-small">{{ B.deliverables_label }}</span>
+          <ul class="ticks">{% for d in B.deliverables[loop.index0] %}<li>{{ icon('check') }} {{ d }}</li>{% endfor %}</ul>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container two-col">
+    <div>
+      <p class="eyebrow">{{ B.timeline_eyebrow }}</p>
+      <h2>{{ B.timeline_title }}</h2>
+      <p class="lead-dark">{{ B.timeline_lead }}</p>
+    </div>
+    <div class="table-scroll">
+      <table class="matrix timeline">
+        <tbody>
+          {% for label, dur in B.timeline_rows %}
+          <tr><th scope="row">{{ label }}</th><td class="mono nowrap">{{ dur }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="samples">
+  <div class="container two-col">
+    <div>
+      <p class="eyebrow">{{ B.sample_eyebrow }}</p>
+      <h2>{{ B.sample_title }}</h2>
+    </div>
+    <ol class="numbered">
+      {% for p in B.sample_points %}<li>{{ p }}</li>{% endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="section section-dark blueprint" id="quality">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow eyebrow-light">{{ B.qa_eyebrow }}</p>
+      <h2>{{ B.qa_title }}</h2>
+    </div>
+    <ol class="qa-track">
+      {% for q in B.qa_items %}
+      <li>
+        <span class="qa-gate mono">QG{{ loop.index }}</span>
+        <h3>{{ q.title }}</h3>
+        <p>{{ q.text }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="note note-light">{{ B.qa_note }}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container grid-2">
+    <article class="panel">
+      <p class="eyebrow">{{ B.commercial_eyebrow }}</p>
+      <h2>{{ B.commercial_title }}</h2>
+      <p>{{ B.commercial_text }}</p>
+      <ul class="ticks">{% for p in B.commercial_points %}<li>{{ icon('check') }} {{ p }}</li>{% endfor %}</ul>
+    </article>
+    <article class="panel">
+      <p class="eyebrow">{{ B.logistics_eyebrow }}</p>
+      <h2>{{ B.logistics_title }}</h2>
+      <p>{{ B.logistics_text }}</p>
+      <div class="mini-tags big">{% for i in ["FOB", "CIF", "DAP", "DDP"] %}<span>{{ i }}</span>{% endfor %}</div>
+    </article>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container two-col">
+    <div>
+      <p class="eyebrow">{{ B.faq_eyebrow }}</p>
+      <h2>{{ B.faq_title }}</h2>
+    </div>
+    <div class="faq">
+      {% for f in B.faq %}
+      <details {% if loop.first %}open{% endif %}>
+        <summary>{{ f.q }} {{ icon('chevron') }}</summary>
+        <p>{{ f.a }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% include "_cta.html" %}
+{% endblock %}

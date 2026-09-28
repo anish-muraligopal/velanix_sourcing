@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ lead.ref }}{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin_leads') }}">← All leads</a></p>
+<h1 class="mono">{{ lead.ref }} <span class="tag">{{ lead.lead_type }}</span></h1>
+
+<div class="grid-2 admin-detail">
+  <section class="panel">
+    <h2 class="h-small">Lead</h2>
+    <table class="matrix timeline">
+      {% for key in ["created_at", "locale", "category", "hs_code", "company", "contact_name", "role", "email", "phone", "company_country", "website", "delivery_country", "quantity", "quantity_unit", "order_type", "annual_volume", "target_price", "currency", "incoterm", "required_by", "sourcing_situation", "compliance", "nda_requested", "source_page", "utm"] %}
+      {% if lead[key] %}<tr><th scope="row">{{ key }}</th><td>{{ lead[key] }}</td></tr>{% endif %}
+      {% endfor %}
+    </table>
+  </section>
+  <section>
+    <div class="panel">
+      <h2 class="h-small">Specification</h2>
+      <table class="matrix timeline">
+        {% for k, v in spec.items() if v %}
+        <tr><th scope="row">{{ k }}</th><td>{{ v|join(', ') if v is not string else v }}</td></tr>
+        {% endfor %}
+      </table>
+      {% if lead.message %}<h3 class="h-small">Message</h3><p class="pre">{{ lead.message }}</p>{% endif %}
+      {% if files %}
+      <h3 class="h-small">Attachments</h3>
+      <ul>{% for f in files %}<li><a href="{{ url_for('admin_file', ref=lead.ref, name=f) }}">{{ f }}</a></li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+    <form class="panel" method="post">
+      <h2 class="h-small">Pipeline</h2>
+      <div class="field">
+        <label for="status">Status</label>
+        <div class="select-wrap"><select id="status" name="status">{% for s in statuses %}<option {% if lead.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="field">
+        <label for="notes">Internal notes</label>
+        <textarea id="notes" name="notes" rows="5">{{ lead.notes or '' }}</textarea>
+      </div>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-primary btn-sm">Save</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<form class="admin-filters" method="get">
+  <input type="search" name="q" value="{{ request.args.get('q', '') }}" placeholder="Search company, email, ref…">
+  <select name="lead_type">
+    <option value="">All types</option>
+    {% for t in ["rfq", "inquiry", "supplier"] %}<option {% if request.args.get('lead_type') == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+  </select>
+  <select name="status">
+    <option value="">All statuses</option>
+    {% for s in statuses %}<option {% if request.args.get('status') == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+  <select name="category">
+    <option value="">All categories</option>
+    {% for slug, name in cat_names.items() %}<option value="{{ slug }}" {% if request.args.get('category') == slug %}selected{% endif %}>{{ name }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-primary btn-sm">Filter</button>
+  <a class="btn btn-secondary btn-sm" href="{{ url_for('admin_leads') }}">Reset</a>
+</form>
+
+<p class="note">{{ leads|length }} lead{{ '' if leads|length == 1 else 's' }}</p>
+<div class="table-scroll">
+  <table class="matrix admin-table">
+    <thead><tr><th>Ref</th><th>Received (UTC)</th><th>Type</th><th>Status</th><th>Category</th><th>Company</th><th>Contact</th><th>Qty</th><th>Deliver to</th><th>Files</th></tr></thead>
+    <tbody>
+      {% for l in leads %}
+      <tr>
+        <td class="mono nowrap"><a href="{{ url_for('admin_lead', ref=l.ref) }}">{{ l.ref }}</a></td>
+        <td class="nowrap">{{ l.created_at }}</td>
+        <td><span class="tag">{{ l.lead_type }}</span></td>
+        <td><span class="status status-{{ l.status }}">{{ l.status }}</span></td>
+        <td>{{ cat_names.get(l.category, l.category) }}</td>
+        <td>{{ l.company }}</td>
+        <td>{{ l.contact_name }}<br><small>{{ l.email }}</small></td>
+        <td class="nowrap">{{ l.quantity or '' }} {{ l.quantity_unit or '' }}</td>
+        <td>{{ l.delivery_country or '' }}</td>
+        <td>{{ (l.attachments or '').split(', ')|select|list|length }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10">No leads yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

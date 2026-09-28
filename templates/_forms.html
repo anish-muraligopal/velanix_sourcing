@@ -1,0 +1,99 @@
+{# Form field macros. `values` is a dict of name -> list (request.form.to_dict(flat=False)). #}
+
+{% macro first(values, name) %}{{ (values.get(name) or [''])[0] }}{% endmacro %}
+
+{% macro err(errors, name) -%}
+{% if errors.get(name) %}<p class="field-error" id="{{ name }}-err">{{ errors[name] }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro req(required) %}{% if required %} <span class="req" aria-hidden="true">*</span>{% endif %}{% endmacro %}
+
+{% macro input(name, label, values, errors, type="text", required=False, ph="", half=False, summary=True, attrs="") -%}
+<div class="field{% if half %} half{% endif %}{% if errors.get(name) %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{{ req(required) }}</label>
+  <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ first(values, name) }}"
+         {% if ph %}placeholder="{{ ph }}"{% endif %} {% if required %}required{% endif %}
+         {% if summary %}data-summary="{{ label }}"{% endif %}
+         {% if errors.get(name) %}aria-invalid="true" aria-describedby="{{ name }}-err"{% endif %} {{ attrs|safe }}>
+  {{ err(errors, name) }}
+</div>
+{%- endmacro %}
+
+{% macro textarea(name, label, values, errors, ph="", required=False, rows=4) -%}
+<div class="field{% if errors.get(name) %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{{ req(required) }}</label>
+  <textarea id="f-{{ name }}" name="{{ name }}" rows="{{ rows }}" {% if ph %}placeholder="{{ ph }}"{% endif %} {% if required %}required{% endif %}>{{ first(values, name) }}</textarea>
+  {{ err(errors, name) }}
+</div>
+{%- endmacro %}
+
+{# options: list of (value, label) #}
+{% macro select(name, label, options, values, errors, required=False, half=False, placeholder="", summary=True) -%}
+{% set current = first(values, name)|string %}
+<div class="field{% if half %} half{% endif %}{% if errors.get(name) %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{{ req(required) }}</label>
+  <div class="select-wrap">
+    <select id="f-{{ name }}" name="{{ name }}" {% if required %}required{% endif %} {% if summary %}data-summary="{{ label }}"{% endif %}
+            {% if errors.get(name) %}aria-invalid="true" aria-describedby="{{ name }}-err"{% endif %}>
+      {% if placeholder %}<option value="">{{ placeholder }}</option>{% endif %}
+      {% for v, l in options %}<option value="{{ v }}" {% if current == v|string %}selected{% endif %}>{{ l }}</option>{% endfor %}
+    </select>
+  </div>
+  {{ err(errors, name) }}
+</div>
+{%- endmacro %}
+
+{# Chip group: kind "radio" or "multi" #}
+{% macro chips(name, label, options, values, errors, kind="multi", required=False) -%}
+{% set selected = values.get(name) or [] %}
+<fieldset class="field chips-field{% if errors.get(name) %} has-error{% endif %}" {% if required %}data-required{% endif %}>
+  <legend>{{ label }}{{ req(required) }}</legend>
+  <div class="chips">
+    {% for v, l in options %}
+    <label class="chip">
+      <input type="{{ 'radio' if kind == 'radio' else 'checkbox' }}" name="{{ name }}" value="{{ v }}"
+             data-summary="{{ label }}" data-label="{{ l }}" {% if v|string in selected %}checked{% endif %}>
+      <span>{{ l }}</span>
+    </label>
+    {% endfor %}
+  </div>
+  {{ err(errors, name) }}
+</fieldset>
+{%- endmacro %}
+
+{# Category-specific spec field from content/categories.py #}
+{% macro spec_field(f, values, errors, loc, T) -%}
+{% set key = "spec_" ~ f.name %}
+{% set options = [] %}{% for o in f.options %}{% set _ = options.append((o.value, loc(o.label))) %}{% endfor %}
+{% if f.kind in ("radio", "multi") %}
+  {{ chips(key, loc(f.label), options, values, errors, kind=f.kind, required=f.required) }}
+{% elif f.kind == "select" %}
+  {{ select(key, loc(f.label), options, values, errors, required=f.required, half=f.half, placeholder=T.form.select) }}
+{% elif f.kind == "textarea" %}
+  {{ textarea(key, loc(f.label), values, errors, ph=loc(f.ph) if f.ph else "", required=f.required) }}
+{% else %}
+  {{ input(key, loc(f.label), values, errors, type=f.kind, required=f.required, ph=loc(f.ph) if f.ph else "", half=f.half) }}
+{% endif %}
+{%- endmacro %}
+
+{% macro consent(values, errors, T) -%}
+<div class="field check-field{% if errors.get('consent') %} has-error{% endif %}">
+  <label class="check">
+    <input type="checkbox" name="consent" value="yes" required {% if values.get('consent') %}checked{% endif %}>
+    <span>{{ T.form.consent }} <a href="{{ url_for('legal') }}#privacy" target="_blank" rel="noopener">{{ T.form.privacy_link }}</a></span>
+  </label>
+  {{ err(errors, 'consent') }}
+</div>
+{# Honeypot: hidden from people, filled in by bots #}
+<div class="hp" aria-hidden="true"><label>Company URL <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
+{% if not static_mode %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+{%- endmacro %}
+
+{# On the static site, JS submits forms to the configured endpoint (or a pre-filled email). #}
+{% macro static_attrs(kind, subject) -%}
+{% if static_mode %}data-static-form data-kind="{{ kind }}" data-subject="{{ subject }}" data-endpoint="{{ form_endpoint }}" data-mailto="{{ site.email }}" data-thanks="{{ url_for('thanks_static') }}"{% endif %}
+{%- endmacro %}
+
+{% macro error_banner(errors, T) -%}
+{% if errors %}<div class="form-alert" role="alert">{{ T.form.errors.summary }}</div>{% endif %}
+{%- endmacro %}

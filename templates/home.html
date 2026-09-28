@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set H = T.home %}
+{% block content %}
+
+<section class="hero blueprint">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow eyebrow-light">{{ H.hero_eyebrow }}</p>
+      <h1>{{ H.hero_title }}</h1>
+      <p class="lead">{{ H.hero_lead }}</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="#rfq-start">{{ H.hero_cta_primary }} {{ icon('arrow') }}</a>
+        <a class="btn btn-ghost-light" href="#how">{{ H.hero_cta_secondary }}</a>
+      </div>
+      <ul class="hero-points">
+        {% for p in H.hero_points %}<li>{{ icon('check') }} {{ p }}</li>{% endfor %}
+      </ul>
+    </div>
+
+    <form class="quote-card" id="rfq-start" action="{{ url_for('rfq_start') }}" method="get" data-quick>
+      <div class="quote-card-head">
+        <span class="mono">RFQ / 01</span>
+        <h2>{{ H.quick_title }}</h2>
+        <p>{{ H.quick_sub }}</p>
+      </div>
+      <div class="field">
+        <label for="q-category">{{ H.quick_category }} <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select id="q-category" name="category" required>
+            <option value="">{{ H.quick_choose }}</option>
+            {% for c in categories %}<option value="{{ c.slug }}" data-url="{{ url_for('category', slug=c.slug) }}">{{ loc(c.name) }} — {{ c.hs }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field half">
+          <label for="q-qty">{{ H.quick_quantity }}</label>
+          <input id="q-qty" name="quantity" type="text" inputmode="numeric" placeholder="e.g. 2,500">
+        </div>
+        <div class="field half">
+          <label for="q-country">{{ H.quick_delivery }}</label>
+          <div class="select-wrap">
+            <select id="q-country" name="delivery_country">
+              <option value="">—</option>
+              {% for code, name in countries %}<option value="{{ code }}">{{ name }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">{{ H.quick_submit }} {{ icon('arrow') }}</button>
+      <p class="quote-note">{{ icon('lock') }} {{ H.quick_note }}</p>
+    </form>
+  </div>
+</section>
+
+<section class="standards-bar" aria-label="{{ H.standards_label }}">
+  <div class="container standards-inner">
+    <span class="standards-label">{{ H.standards_label }}</span>
+    <ul class="standards-list">
+      {% for s in ["ISO 9001", "IATF 16949", "ISO 13485", "PED 2014/68/EU", "EN 10204 3.1", "API 6D", "CE", "REACH / RoHS", "OEKO-TEX", "GOTS"] %}
+      <li>{{ s }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{{ H.why_eyebrow }}</p>
+      <h2>{{ H.why_title }}</h2>
+      <p class="lead-dark">{{ H.why_lead }}</p>
+    </div>
+    <div class="grid-4">
+      {% for item in H.why_items %}
+      <article class="feature">
+        <span class="feature-ico">{{ icon(['branch', 'shield', 'doc', 'partner'][loop.index0]) }}</span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.text }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="categories">
+  <div class="container">
+    <div class="section-head split">
+      <div>
+        <p class="eyebrow">{{ H.categories_eyebrow }}</p>
+        <h2>{{ H.categories_title }}</h2>
+      </div>
+      <p class="lead-dark">{{ H.categories_lead }}</p>
+    </div>
+    <div class="cat-grid">
+      {% for c in categories %}
+      <a class="cat-tile" href="{{ url_for('category', slug=c.slug) }}">
+        <span class="cat-top"><span class="cat-ico">{{ icon(c.icon) }}</span><span class="tag mono">{{ c.hs }}</span></span>
+        <h3>{{ loc(c.name) }}</h3>
+        <p>{{ loc(c.short) }}</p>
+        <span class="cat-meta mono">{{ c.clusters[:3]|join(' · ') }}</span>
+        <span class="cat-cta">{{ H.tile_cta }} {{ icon('arrow') }}</span>
+      </a>
+      {% endfor %}
+      <a class="cat-tile cat-tile-cta" href="{{ url_for('contact') }}">
+        <h3>{{ H.cta_title }}</h3>
+        <p>{{ H.cta_text }}</p>
+        <span class="cat-cta">{{ H.cta_secondary }} {{ icon('arrow') }}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{{ H.how_eyebrow }}</p>
+      <h2>{{ H.how_title }}</h2>
+      <p class="lead-dark">{{ H.how_lead }}</p>
+    </div>
+    <ol class="steps">
+      {% for s in T.how.steps %}
+      <li class="step">
+        <span class="step-num mono">{{ '%02d' % loop.index }}</span>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.text }}</p>
+        <span class="step-dur mono">{{ s.duration }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="section-link"><a class="link-arrow" href="{{ url_for('buyers') }}">{{ H.how_more }} {{ icon('arrow') }}</a></p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{{ H.matrix_eyebrow }}</p>
+      <h2>{{ H.matrix_title }}</h2>
+      <p class="lead-dark">{{ H.matrix_lead }}</p>
+    </div>
+    <div class="table-scroll">
+      <table class="matrix matrix-cats">
+        <thead><tr>{% for col in H.matrix_cols %}<th scope="col">{{ col }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for c in categories %}
+          <tr>
+            <th scope="row"><a href="{{ url_for('category', slug=c.slug) }}">{{ loc(c.name) }}</a></th>
+            <td class="mono nowrap">{{ c.hs }}</td>
+            <td>{{ loc(c.processes)[:3]|join(', ') }}</td>
+            <td><span class="mini-tags">{% for s in c.standards[:4] %}<span>{{ s }}</span>{% endfor %}</span></td>
+            <td>{{ c.clusters|join(', ') }}</td>
+            <td>{{ loc(c.lead_sample) }}</td>
+            <td>{{ loc(c.lead_series) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="note">{{ H.matrix_note }}</p>
+  </div>
+</section>
+
+<section class="section section-dark blueprint">
+  <div class="container belt-grid">
+    <div>
+      <p class="eyebrow eyebrow-light">{{ H.belt_eyebrow }}</p>
+      <h2>{{ H.belt_title }}</h2>
+      {% for p in H.belt_text %}<p class="lead">{{ p }}</p>{% endfor %}
+      <h3 class="belt-sub">{{ H.belt_secondary }}</h3>
+      <ul class="cluster-chips">
+        {% for name, en, de in [("Ahmedabad / Vadodara", "valves · pumps · cable · medical", "Armaturen · Pumpen · Kabel · Medizin"), ("Rajkot", "castings · machining", "Guss · Bearbeitung"), ("Kolhapur / Belagavi", "foundries", "Gießereien"), ("Pune", "auto · machinery", "Automobil · Maschinenbau"), ("Panipat", "rugs · home textiles", "Teppiche · Heimtextilien"), ("Bhadohi", "hand-knotted carpets", "handgeknüpfte Teppiche"), ("Daman / Silvassa", "cable", "Kabel")] %}
+        <li><strong>{{ name }}</strong><span class="mono">{{ en if lang == 'en' else de }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <figure class="belt-map" aria-label="{{ H.belt_primary }}">
+      <figcaption class="mono">{{ H.belt_primary }}</figcaption>
+      {# Schematic: dots placed by real longitude/latitude (x = lon, y = lat), no coastline. #}
+      <svg viewBox="0 0 480 540" role="img" aria-label="Coimbatore, Madurai, Karur, Hosur, Chennai, Thoothukudi">
+        <g class="grid-lines">
+          {% for y, lab in [(80, "13°N"), (180, "12°N"), (280, "11°N"), (380, "10°N"), (480, "9°N")] %}
+          <line x1="20" x2="470" y1="{{ y }}" y2="{{ y }}"/><text x="468" y="{{ y - 6 }}" text-anchor="end">{{ lab }}</text>
+          {% endfor %}
+          {% for x, lab in [(90, "77°E"), (190, "78°E"), (290, "79°E"), (390, "80°E")] %}
+          <line y1="20" y2="530" x1="{{ x }}" x2="{{ x }}"/><text x="{{ x + 5 }}" y="34">{{ lab }}</text>
+          {% endfor %}
+        </g>
+        <g class="links">
+          <path d="M86 278L198 284M86 278L202 387M86 278L173 106M173 106L417 72M202 387L203 504M86 278L417 72"/>
+        </g>
+        <g class="nodes">
+          <circle class="pulse" cx="86" cy="278" r="18"/>
+          <circle class="hub" cx="86" cy="278" r="8"/>
+          <text class="lbl-main" x="104" y="262">Coimbatore</text>
+          <text class="lbl-sub" x="104" y="246">{{ 'pumps · foundries · machining' if lang == 'en' else 'Pumpen · Gießereien · Bearbeitung' }}</text>
+          {% set de = lang == 'de' %}
+          {% for x, y, name, sub, anchor, dx in [(198, 284, "Karur", "Heimtextilien" if de else "home textiles", "start", 14), (202, 387, "Madurai", "Automobil · Textil" if de else "auto · textiles", "start", 14), (173, 106, "Hosur", "Automobil" if de else "automotive", "start", 14), (417, 72, "Chennai", "Automobil · Medizin · Hafen" if de else "auto · medical · port", "end", -14), (203, 504, "Thoothukudi", "Hafen" if de else "port", "start", 14)] %}
+          <circle class="node" cx="{{ x }}" cy="{{ y }}" r="6"/>
+          <text class="lbl" x="{{ x + dx }}" y="{{ y + 5 }}" text-anchor="{{ anchor }}">{{ name }}</text>
+          <text class="lbl-sub" x="{{ x + dx }}" y="{{ y + 21 }}" text-anchor="{{ anchor }}">{{ sub }}</text>
+          {% endfor %}
+        </g>
+      </svg>
+    </figure>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{{ H.cases_eyebrow }}</p>
+      <h2>{{ H.cases_title }}</h2>
+      <p class="lead-dark">{{ H.cases_lead }}</p>
+    </div>
+    <div class="grid-3">
+      {% for c in H.cases %}
+      <article class="case">
+        <div class="case-head"><span class="mono">{{ c.sector }}</span><span class="tag tag-muted">{{ H.cases_tag }}</span></div>
+        <h3>{{ c.title }}</h3>
+        <dl>
+          <dt>{{ 'Challenge' if lang == 'en' else 'Ausgangslage' }}</dt><dd>{{ c.challenge }}</dd>
+          <dt>{{ 'Approach' if lang == 'en' else 'Vorgehen' }}</dt><dd>{{ c.approach }}</dd>
+          <dt>{{ 'Outcome' if lang == 'en' else 'Ergebnis' }}</dt><dd>{{ c.outcome }}</dd>
+        </dl>
+      </article>
+      {% endfor %}
+    </div>
+    <aside class="fta">
+      <span class="eyebrow">{{ H.fta_eyebrow }}</span>
+      <div>
+        <h3>{{ H.fta_title }}</h3>
+        <p>{{ H.fta_text }}</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+{% include "_cta.html" %}
+{% endblock %}

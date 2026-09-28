@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% import "_forms.html" as F with context %}
+{% set C = T.category %}
+{% set FT = T.form %}
+{% block title %}{{ loc(cat.name) }} ({{ cat.hs }}) — {{ T.meta.suffix }}{% endblock %}
+{% block description %}{{ T.meta.category_desc|replace('{name}', loc(cat.name))|replace('{hs}', cat.hs) }}{% endblock %}
+{% block content %}
+
+<section class="page-hero blueprint-light">
+  <div class="container cat-hero">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ url_for('home') }}">{{ T.nav.home }}</a><span>/</span>
+        <a href="{{ url_for('home') }}#categories">{{ C.breadcrumb }}</a><span>/</span>
+        <span aria-current="page">{{ loc(cat.name) }}</span>
+      </nav>
+      <span class="tag mono">{{ cat.hs }}</span>
+      <h1>{{ loc(cat.name) }}</h1>
+      <p class="lead-dark">{{ loc(cat.intro) }}</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="#rfq">{{ C.form_title }} {{ icon('arrow') }}</a>
+      </div>
+    </div>
+    <aside class="spec-plate" aria-label="{{ C.overview }}">
+      <div class="spec-plate-ico">{{ icon(cat.icon) }}</div>
+      <dl>
+        <div><dt>HS</dt><dd class="mono">{{ cat.hs }}</dd></div>
+        <div><dt>{{ C.clusters }}</dt><dd>{{ cat.clusters|join(' · ') }}</dd></div>
+        <div><dt>{{ C.lead_sample }}</dt><dd>{{ loc(cat.lead_sample) }}</dd></div>
+        <div><dt>{{ C.lead_series }}</dt><dd>{{ loc(cat.lead_series) }}</dd></div>
+      </dl>
+    </aside>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="cap-grid">
+      <div class="cap">
+        <h2 class="cap-title mono">{{ C.processes }}</h2>
+        <ul class="ticks">{% for p in loc(cat.processes) %}<li>{{ icon('check') }} {{ p }}</li>{% endfor %}</ul>
+      </div>
+      <div class="cap">
+        <h2 class="cap-title mono">{{ C.materials }}</h2>
+        <ul class="ticks">{% for p in loc(cat.materials) %}<li>{{ icon('check') }} {{ p }}</li>{% endfor %}</ul>
+      </div>
+      <div class="cap">
+        <h2 class="cap-title mono">{{ C.standards }}</h2>
+        <div class="mini-tags big">{% for s in cat.standards %}<span>{{ s }}</span>{% endfor %}</div>
+      </div>
+      <div class="cap">
+        <h2 class="cap-title mono">{{ C.clusters }}</h2>
+        <ul class="ticks">{% for p in cat.clusters %}<li>{{ icon('pin') }} {{ p }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="rfq">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{{ C.form_eyebrow }} · {{ cat.hs }}</p>
+      <h2>{{ C.form_title }}</h2>
+      <p class="note">{{ FT.required_note }}</p>
+    </div>
+
+    <div class="rfq-layout">
+      <form class="rfq-form" method="post" enctype="multipart/form-data" action="{{ url_for('category', slug=cat.slug) }}#rfq" novalidate data-stepper {{ F.static_attrs('buyer', 'RFQ ' ~ cat.hs ~ ' — ' ~ cat.name.en) }}>
+        <input type="hidden" name="lead_type" value="rfq"><input type="hidden" name="category" value="{{ cat.slug }}"><input type="hidden" name="hs_code" value="{{ cat.hs }}">
+        {{ F.error_banner(errors, T) }}
+        <ol class="stepper" aria-hidden="true">
+          {% for s in FT.steps %}<li data-step-ind="{{ loop.index0 }}"><span class="mono">{{ loop.index }}</span>{{ s }}</li>{% endfor %}
+        </ol>
+
+        {# Step 1: part & drawings #}
+        <fieldset class="step-panel" data-step="0">
+          <legend class="step-legend"><span class="mono">01</span> {{ FT.step_titles[0] }}</legend>
+          {{ F.input("part_name", FT.part_name, values, errors, ph=FT.part_name_ph) }}
+          <div class="field">
+            <span class="label">{{ FT.attachments }}</span>
+            <label class="dropzone" for="f-attachments">
+              {{ icon('upload') }}
+              <strong>{{ FT.drop_title }}</strong>
+              <span>{{ FT.drop_hint }}</span>
+              <input id="f-attachments" type="file" name="attachments" multiple
+                     accept=".pdf,.step,.stp,.igs,.iges,.dwg,.dxf,.stl,.x_t,.sldprt,.png,.jpg,.jpeg,.xlsx,.xls,.csv,.docx,.zip">
+            </label>
+            <ul class="file-list" aria-live="polite"></ul>
+          </div>
+          <p class="confidential">{{ icon('lock') }} {{ FT.confidential }}</p>
+        </fieldset>
+
+        {# Step 2: category-specific specification #}
+        <fieldset class="step-panel" data-step="1">
+          <legend class="step-legend"><span class="mono">02</span> {{ FT.step_titles[1] }} — {{ loc(cat.name) }}</legend>
+          <div class="field-row">
+            {% for f in cat.fields %}{{ F.spec_field(f, values, errors, loc, T) }}{% endfor %}
+          </div>
+        </fieldset>
+
+        {# Step 3: commercial #}
+        <fieldset class="step-panel" data-step="2">
+          <legend class="step-legend"><span class="mono">03</span> {{ FT.step_titles[2] }}</legend>
+          <div class="field-row">
+            {{ F.input("quantity", FT.quantity, values, errors, required=True, half=True, attrs='inputmode="numeric"') }}
+            {% set unit_opts = [] %}{% for u in units %}{% set _ = unit_opts.append((u.value, loc(u.label))) %}{% endfor %}
+            {% if not values.get('quantity_unit') %}{% set values = dict(values, quantity_unit=[cat.unit]) %}{% endif %}
+            {{ F.select("quantity_unit", FT.unit, unit_opts, values, errors, half=True, summary=False) }}
+            {{ F.input("annual_volume", FT.annual_volume, values, errors, ph=FT.annual_volume_ph, half=True) }}
+            {% set ot = [] %}{% for o in order_types %}{% set _ = ot.append((o.value, loc(o.label))) %}{% endfor %}
+            {{ F.select("order_type", FT.order_type, ot, values, errors, half=True, placeholder=FT.select) }}
+            {{ F.input("target_price", FT.target_price, values, errors, half=True, attrs='inputmode="decimal"') }}
+            {% if not values.get('currency') %}{% set values = dict(values, currency=['EUR']) %}{% endif %}
+            {{ F.select("currency", FT.currency, currencies|map('string')|zip_self, values, errors, half=True, summary=False) }}
+            {{ F.select("delivery_country", FT.delivery_country, countries, values, errors, required=True, half=True, placeholder=FT.select) }}
+            {{ F.select("incoterm", FT.incoterm, incoterms|map('string')|zip_self, values, errors, half=True, placeholder=FT.select) }}
+            {{ F.input("required_by", FT.required_by, values, errors, type="date", half=True) }}
+          </div>
+          {% set sit = [] %}{% for o in situations %}{% set _ = sit.append((o.value, loc(o.label))) %}{% endfor %}
+          {{ F.chips("sourcing_situation", FT.sourcing_situation, sit, values, errors, kind="radio") }}
+          {% set comp = [] %}{% for o in compliance %}{% set _ = comp.append((o.value, loc(o.label))) %}{% endfor %}
+          {{ F.chips("compliance", FT.compliance, comp, values, errors) }}
+        </fieldset>
+
+        {# Step 4: contact #}
+        <fieldset class="step-panel" data-step="3">
+          <legend class="step-legend"><span class="mono">04</span> {{ FT.step_titles[3] }}</legend>
+          <div class="field-row">
+            {{ F.input("company", FT.company, values, errors, required=True, half=True, attrs='autocomplete="organization"') }}
+            {{ F.input("contact_name", FT.contact_name, values, errors, required=True, half=True, summary=False, attrs='autocomplete="name"') }}
+            {{ F.input("role", FT.role, values, errors, half=True, summary=False, attrs='autocomplete="organization-title"') }}
+            {{ F.input("email", FT.email, values, errors, type="email", required=True, half=True, summary=False, attrs='autocomplete="email"') }}
+            {{ F.input("phone", FT.phone, values, errors, type="tel", half=True, summary=False, attrs='autocomplete="tel"') }}
+            {{ F.select("company_country", FT.company_country, countries, values, errors, half=True, placeholder=FT.select, summary=False) }}
+          </div>
+          {{ F.textarea("message", FT.message, values, errors, ph=FT.message_ph) }}
+          <div class="field check-field">
+            <label class="check"><input type="checkbox" name="nda" value="yes" {% if values.get('nda') %}checked{% endif %}><span>{{ FT.nda }}</span></label>
+          </div>
+          {{ F.consent(values, errors, T) }}
+        </fieldset>
+
+        <div class="step-nav">
+          <button type="button" class="btn btn-secondary" data-prev>{{ FT.back }}</button>
+          <button type="button" class="btn btn-primary" data-next>{{ FT.next }} {{ icon('arrow') }}</button>
+          <button type="submit" class="btn btn-primary" data-submit>{{ FT.submit }} {{ icon('arrow') }}</button>
+        </div>
+      </form>
+
+      <aside class="rfq-summary" aria-live="polite">
+        <div class="summary-card">
+          <div class="summary-head">
+            <span class="summary-ico">{{ icon(cat.icon) }}</span>
+            <div><span class="mono">{{ FT.summary_title }} · {{ cat.hs }}</span><strong>{{ loc(cat.name) }}</strong></div>
+          </div>
+          <dl class="summary-list" data-summary-list data-files-label="{{ FT.summary_files }}"></dl>
+          <p class="summary-empty" data-summary-empty>{{ FT.summary_empty }}</p>
+          <div class="summary-next">
+            <h3 class="mono">{{ FT.summary_next }}</h3>
+            <ol>{% for s in FT.summary_steps %}<li>{{ s }}</li>{% endfor %}</ol>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <h2 class="h-small">{{ C.other_title }}</h2>
+    <div class="other-cats">
+      {% for c in categories if c.slug != cat.slug %}
+      <a href="{{ url_for('category', slug=c.slug) }}"><span class="mega-ico">{{ icon(c.icon) }}</span><span>{{ loc(c.name) }}<small class="mono">{{ c.hs }}</small></span></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ T.meta.thanks_title }} — {{ T.meta.suffix }}{% endblock %}
+{% block content %}
+<section class="section blueprint-light">
+  <div class="container thanks" {% if ref is none %}data-thanks-static{% endif %}>
+    <span class="thanks-ico">{{ icon('check') }}</span>
+    <h1>{{ T.thanks.title }}</h1>
+    {% if ref is none %}
+    {# Static site: JS reads ?ref=…&kind=… #}
+    <p class="ref-box" hidden data-ref-box><span class="mono label-small">{{ T.thanks.ref_label }}</span><strong class="mono" data-ref></strong></p>
+    <p class="lead-dark" data-kind-text="buyer">{{ T.thanks.buyer_text }}</p>
+    <p class="lead-dark" data-kind-text="supplier" hidden>{{ T.thanks.supplier_text }}</p>
+    {% else %}
+    {% if ref != "VX-0" %}
+    <p class="ref-box"><span class="mono label-small">{{ T.thanks.ref_label }}</span><strong class="mono">{{ ref }}</strong></p>
+    {% endif %}
+    <p class="lead-dark">{{ T.thanks.supplier_text if kind == 'supplier' else T.thanks.buyer_text }}</p>
+    {% endif %}
+    {% if kind != 'supplier' %}
+    <div data-kind-text="buyer">
+      <h2 class="h-small">{{ T.thanks.next_title }}</h2>
+      <ol class="steps steps-compact">
+        {% for s in T.how.steps[:3] %}
+        <li class="step"><span class="step-num mono">{{ '%02d' % loop.index }}</span><h3>{{ s.title }}</h3><span class="step-dur mono">{{ s.duration }}</span></li>
+        {% endfor %}
+      </ol>
+    </div>
+    {% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('home') }}">{{ T.thanks.home }}</a>
+  </div>
+</section>
+{% endblock %}

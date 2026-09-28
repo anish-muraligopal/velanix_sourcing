@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% set A = T.about %}
+{% block title %}{{ T.meta.about_title }} — {{ T.meta.suffix }}{% endblock %}
+{% block description %}{{ T.meta.about_desc }}{% endblock %}
+{% block content %}
+
+<section class="page-hero blueprint">
+  <div class="container narrow-hero">
+    <p class="eyebrow eyebrow-light">{{ A.eyebrow }}</p>
+    <h1>{{ A.title }}</h1>
+    <p class="lead">{{ A.lead }}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container two-col">
+    <div><h2>{{ A.story_title }}</h2></div>
+    <div class="prose">{% for p in A.story %}<p>{{ p }}</p>{% endfor %}</div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head"><h2>{{ A.model_title }}</h2></div>
+    <div class="grid-2">
+      <article class="panel">
+        <h3>{{ A.does_title }}</h3>
+        <ul class="ticks">{% for d in A.does %}<li>{{ icon('check') }} {{ d }}</li>{% endfor %}</ul>
+      </article>
+      <article class="panel panel-muted">
+        <h3>{{ A.doesnt_title }}</h3>
+        <ul class="ticks ticks-cross">{% for d in A.doesnt %}<li>{{ icon('cross') }} {{ d }}</li>{% endfor %}</ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head"><h2>{{ A.team_title }}</h2></div>
+    <div class="grid-3">
+      {% for m in team %}
+      <article class="person">
+        <div class="avatar mono" aria-hidden="true">{{ m.initials }}</div>
+        <h3>{{ m.name }}</h3>
+        <p class="person-role">{{ loc(m.role) }}</p>
+        {% if m.magna and site.show_magna %}<span class="tag">{{ A.magna_badge }}</span>{% endif %}
+        <p>{{ loc(m.bio) if (site.show_magna or not m.bio_alt) else loc(m.bio_alt) }}</p>
+        <p class="person-loc mono">{{ icon('pin') }} {{ loc(m.location) }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-dark blueprint">
+  <div class="container">
+    <div class="section-head"><h2>{{ A.principles_title }}</h2></div>
+    <div class="grid-4">
+      {% for p in A.principles %}
+      <article class="principle"><span class="mono">{{ '%02d' % loop.index }}</span><h3>{{ p.title }}</h3><p>{{ p.text }}</p></article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head"><h2>{{ A.locations_title }}</h2></div>
+    <div class="grid-2">
+      <article class="panel location">
+        <span class="tag mono">EU</span>
+        <h3>{{ A.loc_eu }}</h3>
+        <p>{{ A.loc_eu_text }}</p>
+        <p class="mono small">{{ site.address_eu }}</p>
+      </article>
+      <article class="panel location">
+        <span class="tag mono">IN</span>
+        <h3>{{ A.loc_in }}</h3>
+        <p>{{ A.loc_in_text }}</p>
+        <p class="mono small">{{ site.address_in }}</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+{% include "_cta.html" %}
+{% endblock %}

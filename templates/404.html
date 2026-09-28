@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ T.notfound.title }} — {{ T.meta.suffix }}{% endblock %}
+{% block content %}
+<section class="section blueprint-light">
+  <div class="container thanks">
+    <p class="mono eyebrow">404</p>
+    <h1>{{ T.notfound.title }}</h1>
+    <p class="lead-dark">{{ T.notfound.text }}</p>
+    <a class="btn btn-primary" href="{{ url_for('home', lang=lang) }}">{{ T.notfound.home }}</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% import "_forms.html" as F with context %}
+{% set K = T.contact %}
+{% set FT = T.form %}
+{% block title %}{{ T.meta.contact_title }} — {{ T.meta.suffix }}{% endblock %}
+{% block description %}{{ T.meta.contact_desc }}{% endblock %}
+{% block content %}
+
+<section class="page-hero blueprint-light">
+  <div class="container narrow-hero">
+    <p class="eyebrow">{{ K.eyebrow }}</p>
+    <h1>{{ K.title }}</h1>
+    <p class="lead-dark">{{ K.lead }}</p>
+  </div>
+</section>
+
+<section class="section section-tight" id="enquiry">
+  <div class="container contact-layout">
+    <form class="card-form" method="post" action="{{ url_for('contact') }}#enquiry" novalidate data-validate {{ F.static_attrs('buyer', 'Enquiry') }}>
+      <input type="hidden" name="lead_type" value="inquiry">
+      <h2 class="h-small">{{ K.form_title }}</h2>
+      {{ F.error_banner(errors, T) }}
+      {% set cats = [] %}{% for c in categories %}{% set _ = cats.append((c.slug, loc(c.name) ~ ' — ' ~ c.hs)) %}{% endfor %}
+      {% set _ = cats.append(("other", "Other" if lang == "en" else "Sonstiges")) %}
+      {{ F.select("category", FT.category, cats, values, errors, required=True, placeholder=FT.select) }}
+      {{ F.input("product", K.product, values, errors, ph=K.product_ph) }}
+      <div class="field-row">
+        {{ F.input("quantity", FT.quantity, values, errors, half=True, attrs='inputmode="numeric"') }}
+        {% set unit_opts = [] %}{% for u in units %}{% set _ = unit_opts.append((u.value, loc(u.label))) %}{% endfor %}
+        {{ F.select("quantity_unit", FT.unit, unit_opts, values, errors, half=True) }}
+        {{ F.select("delivery_country", FT.delivery_country, countries, values, errors, half=True, placeholder=FT.select) }}
+        {{ F.input("target_price", FT.target_price ~ " (EUR)", values, errors, half=True, attrs='inputmode="decimal"') }}
+        {{ F.input("company", FT.company, values, errors, required=True, half=True, attrs='autocomplete="organization"') }}
+        {{ F.input("contact_name", FT.contact_name, values, errors, required=True, half=True, attrs='autocomplete="name"') }}
+        {{ F.input("email", FT.email, values, errors, type="email", required=True, half=True, attrs='autocomplete="email"') }}
+        {{ F.input("phone", FT.phone, values, errors, type="tel", half=True, attrs='autocomplete="tel"') }}
+        {{ F.input("role", FT.role, values, errors, half=True) }}
+        {{ F.select("company_country", FT.company_country, countries, values, errors, half=True, placeholder=FT.select) }}
+      </div>
+      {{ F.textarea("message", FT.message, values, errors, ph=FT.message_ph) }}
+      {{ F.consent(values, errors, T) }}
+      <button class="btn btn-primary" type="submit">{{ K.submit }} {{ icon('arrow') }}</button>
+    </form>
+
+    <aside class="contact-side">
+      <div class="panel">
+        <h2 class="h-small">{{ K.details_title }}</h2>
+        <ul class="contact-list">
+          <li>{{ icon('mail') }}<div><span class="label-small mono">{{ K.email }}</span><a href="mailto:{{ site.email }}">{{ site.email }}</a></div></li>
+          <li>{{ icon('phone') }}<div><span class="label-small mono">{{ K.phone }}</span>{{ site.phone }}<small>{{ K.hours }}</small></div></li>
+          <li>{{ icon('pin') }}<div><span class="label-small mono">{{ T.about.loc_eu }}</span>{{ site.address_eu }}</div></li>
+          <li>{{ icon('pin') }}<div><span class="label-small mono">{{ T.about.loc_in }}</span>{{ site.address_in }}</div></li>
+        </ul>
+      </div>
+      <div class="panel panel-accent">
+        <h2 class="h-small">{{ K.rfq_hint_title }}</h2>
+        <p>{{ K.rfq_hint }}</p>
+        <ul class="link-list">
+          {% for c in categories %}<li><a href="{{ url_for('category', slug=c.slug) }}#rfq">{{ loc(c.name) }} {{ icon('arrow') }}</a></li>{% endfor %}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

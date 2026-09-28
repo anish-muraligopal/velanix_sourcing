@@ -1,0 +1,110 @@
+{% from "_icons.html" import icon, logo %}<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ T.meta.home_title }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ T.meta.home_desc }}{% endblock %}">
+  {% for l in langs %}<link rel="alternate" hreflang="{{ l }}" href="{{ site.domain }}{{ alt_url(l) }}">
+  {% endfor %}<link rel="alternate" hreflang="x-default" href="{{ site.domain }}{{ alt_url('en') }}">
+  <meta property="og:site_name" content="{{ site.name }}">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:description" content="{{ self.description() }}">
+  <meta name="theme-color" content="#0d1b2a">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script>document.documentElement.classList.add('js')</script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<a class="skip" href="#main">{{ T.nav.skip }}</a>
+
+<div class="topbar">
+  <div class="container topbar-inner">
+    <span>{{ T.topbar.text }}</span>
+    <span class="topbar-right">
+      <span class="mono">{{ T.topbar.locations }}</span>
+      <span class="lang-switch" aria-label="{{ T.nav.language }}">
+        {% for l in langs %}<a href="{{ alt_url(l) }}" hreflang="{{ l }}" {% if l == lang %}aria-current="true"{% endif %}>{{ l|upper }}</a>{% endfor %}
+      </span>
+    </span>
+  </div>
+</div>
+
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a class="brand" href="{{ url_for('home') }}" aria-label="{{ site.name }} — {{ T.nav.home }}">
+      {{ logo() }}
+      <span class="brand-text"><strong>VELANIX</strong><small>SOURCING</small></span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">{{ icon('menu') }}<span class="sr">{{ T.nav.menu }}</span></button>
+    <nav class="site-nav" id="site-nav">
+      <ul>
+        <li class="has-mega">
+          <button class="nav-link mega-toggle" aria-expanded="false">{{ T.nav.categories }} {{ icon('chevron') }}</button>
+          <div class="mega">
+            <div class="mega-grid">
+              {% for c in categories %}
+              <a class="mega-item" href="{{ url_for('category', slug=c.slug) }}">
+                <span class="mega-ico">{{ icon(c.icon) }}</span>
+                <span><strong>{{ loc(c.name) }}</strong><span class="mono">{{ c.hs }}</span></span>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </li>
+        <li><a class="nav-link" href="{{ url_for('buyers') }}" {% if request.endpoint == 'buyers' %}aria-current="page"{% endif %}>{{ T.nav.buyers }}</a></li>
+        <li><a class="nav-link" href="{{ url_for('suppliers') }}" {% if request.endpoint == 'suppliers' %}aria-current="page"{% endif %}>{{ T.nav.suppliers }}</a></li>
+        <li><a class="nav-link" href="{{ url_for('about') }}" {% if request.endpoint == 'about' %}aria-current="page"{% endif %}>{{ T.nav.about }}</a></li>
+        <li><a class="nav-link" href="{{ url_for('contact') }}" {% if request.endpoint == 'contact' %}aria-current="page"{% endif %}>{{ T.nav.contact }}</a></li>
+        <li class="nav-cta"><a class="btn btn-primary btn-sm" href="{{ url_for('home') }}#rfq-start">{{ T.nav.rfq }}</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+{% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="brand brand-light" href="{{ url_for('home') }}">{{ logo() }}<span class="brand-text"><strong>VELANIX</strong><small>SOURCING</small></span></a>
+      <p>{{ T.footer.tagline }}</p>
+      <p class="mono small">{{ T.topbar.locations }}</p>
+    </div>
+    <div>
+      <h3>{{ T.nav.categories }}</h3>
+      <ul>{% for c in categories %}<li><a href="{{ url_for('category', slug=c.slug) }}">{{ loc(c.name) }}</a></li>{% endfor %}</ul>
+    </div>
+    <div>
+      <h3>{{ T.footer.company }}</h3>
+      <ul>
+        <li><a href="{{ url_for('buyers') }}">{{ T.nav.buyers }}</a></li>
+        <li><a href="{{ url_for('suppliers') }}">{{ T.nav.suppliers }}</a></li>
+        <li><a href="{{ url_for('about') }}">{{ T.nav.about }}</a></li>
+        <li><a href="{{ url_for('contact') }}">{{ T.nav.contact }}</a></li>
+        <li><a href="{{ url_for('legal') }}">{{ T.footer.legal }}</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>{{ T.nav.contact }}</h3>
+      <ul class="footer-contact">
+        <li>{{ icon('mail') }} <a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+        <li>{{ icon('phone') }} <span>{{ site.phone }}</span></li>
+        <li>{{ icon('pin') }} <span>{{ site.address_eu }}</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© {{ year }} {{ site.name }}. {{ T.footer.rights }}</span>
+    <span>{{ T.footer.fta_note }}</span>
+    <span class="lang-switch">{% for l in langs %}<a href="{{ alt_url(l) }}" hreflang="{{ l }}" {% if l == lang %}aria-current="true"{% endif %}>{{ l|upper }}</a>{% endfor %}</span>
+  </div>
+</footer>
+<script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+</body>
+</html>

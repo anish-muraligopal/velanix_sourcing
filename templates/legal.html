@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% set G = T.legal %}
+{% block title %}{{ T.meta.legal_title }} — {{ T.meta.suffix }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container prose-page">
+    <h1>{{ G.imprint_title }}</h1>
+    <p class="note">{{ G.imprint_note }}</p>
+    <table class="matrix timeline">
+      <tbody>
+        <tr><th scope="row">{{ G.company }}</th><td>{{ site.legal_name }}</td></tr>
+        <tr><th scope="row">{{ G.address }}</th><td>{{ site.address_eu }}</td></tr>
+        <tr><th scope="row">Email</th><td><a href="mailto:{{ site.email }}">{{ site.email }}</a></td></tr>
+        <tr><th scope="row">{{ T.form.phone }}</th><td>{{ site.phone }}</td></tr>
+        <tr><th scope="row">{{ G.register }}</th><td>{{ site.company_register }}</td></tr>
+        <tr><th scope="row">{{ G.vat }}</th><td>{{ site.vat_id }}</td></tr>
+      </tbody>
+    </table>
+    <h2 id="privacy">{{ G.privacy_title }}</h2>
+    {% for p in G.privacy %}<p>{{ p }}</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

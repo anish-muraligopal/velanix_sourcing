@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% import "_forms.html" as F with context %}
+{% set S = T.suppliers %}
+{% set FT = T.form %}
+{% block title %}{{ T.meta.suppliers_title }} — {{ T.meta.suffix }}{% endblock %}
+{% block description %}{{ T.meta.suppliers_desc }}{% endblock %}
+{% block content %}
+
+<section class="page-hero blueprint">
+  <div class="container narrow-hero">
+    <p class="eyebrow eyebrow-light">{{ S.eyebrow }}</p>
+    <h1>{{ S.title }}</h1>
+    <p class="lead">{{ S.lead }}</p>
+    <div class="btn-row"><a class="btn btn-primary" href="#apply">{{ S.cta }} {{ icon('arrow') }}</a></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head"><h2>{{ S.why_title }}</h2></div>
+    <div class="grid-4">
+      {% for item in S.why_items %}
+      <article class="feature">
+        <span class="feature-ico">{{ icon(['doc', 'shield', 'branch', 'pin'][loop.index0]) }}</span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.text }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container two-col">
+    <div>
+      <p class="eyebrow">{{ S.criteria_eyebrow }}</p>
+      <h2>{{ S.criteria_title }}</h2>
+    </div>
+    <ul class="checklist">
+      {% for c in S.criteria %}<li>{{ icon('check') }} <span>{{ c }}</span></li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">{{ S.vetting_eyebrow }}</p>
+      <h2>{{ S.vetting_title }}</h2>
+    </div>
+    <ol class="steps">
+      {% for s in S.vetting_steps %}
+      <li class="step">
+        <span class="step-num mono">{{ '%02d' % loop.index }}</span>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.text }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="section section-alt" id="apply">
+  <div class="container form-layout">
+    <div class="form-intro">
+      <p class="eyebrow">{{ S.eyebrow }}</p>
+      <h2>{{ S.form_title }}</h2>
+      <p class="lead-dark">{{ S.form_lead }}</p>
+      <p class="note">{{ FT.required_note }}</p>
+    </div>
+    <form class="card-form" method="post" action="{{ url_for('suppliers') }}#apply" novalidate data-validate {{ F.static_attrs('supplier', 'Supplier application') }}>
+      <input type="hidden" name="lead_type" value="supplier">
+      {{ F.error_banner(errors, T) }}
+      <div class="field-row">
+        {{ F.input("company", FT.company, values, errors, required=True, half=True, attrs='autocomplete="organization"') }}
+        {{ F.input("website", FT.website, values, errors, type="url", half=True, ph="https://") }}
+        {{ F.input("city", S.city, values, errors, required=True, half=True, ph="e.g. Coimbatore") }}
+        {% set states = ["Tamil Nadu", "Karnataka", "Kerala", "Maharashtra", "Gujarat", "Haryana", "Punjab", "Uttar Pradesh", "Delhi NCR", "Telangana", "Andhra Pradesh", "West Bengal", "Rajasthan", "Other"] %}
+        {{ F.select("state", S.state, states|zip_self, values, errors, half=True, placeholder=FT.select) }}
+      </div>
+      {% set cats = [] %}{% for c in categories %}{% set _ = cats.append((c.slug, loc(c.name))) %}{% endfor %}
+      {{ F.chips("categories", S.categories, cats, values, errors, required=True) }}
+      {% set certs = ["ISO 9001", "IATF 16949", "ISO 13485", "ISO 14001", "ISO 45001", "PED / AD 2000", "API", "CE", "OEKO-TEX", "GOTS", "amfori BSCI / SMETA"] %}
+      {{ F.chips("certifications", S.certifications, certs|zip_self, values, errors) }}
+      <div class="field-row">
+        {{ F.select("employees", S.employees, ["< 50", "50–200", "200–500", "500–1,000", "> 1,000"]|zip_self, values, errors, half=True, placeholder=FT.select) }}
+        {{ F.select("turnover", S.turnover, ["< ₹10 Cr", "₹10–50 Cr", "₹50–250 Cr", "> ₹250 Cr"]|zip_self, values, errors, half=True, placeholder=FT.select) }}
+        {{ F.input("export_share", S.export_share, values, errors, type="number", half=True, attrs='min="0" max="100"') }}
+        {{ F.input("export_markets", S.export_markets, values, errors, half=True, ph="e.g. Germany, USA, Japan") }}
+      </div>
+      {{ F.chips("eu_customers", S.eu_customers, [("yes", S.yes), ("no", S.no)], values, errors, kind="radio") }}
+      {{ F.textarea("capacity", S.capacity, values, errors, ph=S.capacity_ph, rows=3) }}
+      <div class="field-row">
+        {{ F.input("contact_name", FT.contact_name, values, errors, required=True, half=True, attrs='autocomplete="name"') }}
+        {{ F.input("role", FT.role, values, errors, half=True) }}
+        {{ F.input("email", FT.email, values, errors, type="email", required=True, half=True, attrs='autocomplete="email"') }}
+        {{ F.input("phone", FT.phone, values, errors, type="tel", half=True, ph="+91") }}
+      </div>
+      {{ F.textarea("message", FT.message, values, errors, rows=3) }}
+      {{ F.consent(values, errors, T) }}
+      <button class="btn btn-primary" type="submit">{{ S.submit }} {{ icon('arrow') }}</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

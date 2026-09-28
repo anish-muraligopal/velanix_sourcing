@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{% block title %}Leads{% endblock %} — Velanix admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin">
+  <header class="admin-bar">
+    <div class="container admin-bar-inner">
+      <a href="{{ url_for('admin_leads') }}"><strong>VELANIX</strong> · Lead intake</a>
+      <span class="mono small">Exports: <a href="{{ url_for('admin_csv', **request.args) }}">CSV</a> · <a href="{{ url_for('admin_json', **request.args) }}">JSON</a></span>
+    </div>
+  </header>
+  <main class="container admin-main">{% block content %}{% endblock %}</main>
+</body>
+</html>

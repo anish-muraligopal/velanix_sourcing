@@ -1,0 +1,13 @@
+{% from "_icons.html" import icon %}
+<section class="cta-band">
+  <div class="container cta-inner">
+    <div>
+      <h2>{{ T.home.cta_title }}</h2>
+      <p>{{ T.home.cta_text }}</p>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="{{ url_for('home') }}#rfq-start">{{ T.home.cta_btn }} {{ icon('arrow') }}</a>
+      <a class="btn btn-ghost-light" href="{{ url_for('contact') }}">{{ T.home.cta_secondary }}</a>
+    </div>
+  </div>
+</section>
